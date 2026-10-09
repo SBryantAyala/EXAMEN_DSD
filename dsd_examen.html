@@ -1,0 +1,501 @@
+<title>Práctico DSD Partes 4 y 5</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: hoja de laboratorio sobre papel cuadriculado. Pasos numerados (es el orden real de diseño),
+   tabla y mapa K lado a lado para resaltar los mismos grupos en ambos. */
+:root{
+  --bg:#EDF1F2; --grid:#E0E6E9; --surface:#FAFBFC; --cell:#FFFFFF;
+  --fg:#13222C; --muted:#55687A; --line:#C7D2D9;
+  --hi:#CF6516; --hi-soft:#F8E0C9; --lo:#8A9CA8; --seg-off:#DCE3E7;
+  --g1:#1D6FB8; --g2:#0F8A78; --g3:#B22F7C; --g4:#7653C8; --g5:#85810C;
+  --ok:#1D7448; --bad:#A33A3A;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E161B; --grid:#142027; --surface:#15212A; --cell:#1A2933;
+    --fg:#E3ECF0; --muted:#94A7B3; --line:#2A3A45;
+    --hi:#F39A4B; --hi-soft:#3B2A18; --lo:#566A76; --seg-off:#25353F;
+    --g1:#5CA8EC; --g2:#3FC6B0; --g3:#E56EB0; --g4:#A98FF2; --g5:#C9C53C;
+    --ok:#4CC38A; --bad:#E27A7A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E161B; --grid:#142027; --surface:#15212A; --cell:#1A2933;
+  --fg:#E3ECF0; --muted:#94A7B3; --line:#2A3A45;
+  --hi:#F39A4B; --hi-soft:#3B2A18; --lo:#566A76; --seg-off:#25353F;
+  --g1:#5CA8EC; --g2:#3FC6B0; --g3:#E56EB0; --g4:#A98FF2; --g5:#C9C53C;
+  --ok:#4CC38A; --bad:#E27A7A; color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  padding-block:28px 64px; padding-inline:16px;
+  font-family:var(--f-body); font-size:15px; line-height:1.55; color:var(--fg);
+  background:
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/28px 28px,
+    var(--bg);
+}
+.wrap{max-width:1100px;margin:0 auto}
+:focus-visible{outline:2px solid var(--g1);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font-size:clamp(30px,5.2vw,48px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.lede{max-width:62ch;color:var(--muted);margin:14px 0 24px}
+.neg{text-decoration:overline;text-decoration-thickness:1.5px;text-underline-offset:0}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.tab{font:600 15px var(--f-display);padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+.step{padding-block:26px;border-top:1px solid var(--line);min-width:0}
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.sn{font:700 12px var(--f-mono);color:var(--muted);border:1px solid var(--line);padding:2px 7px;border-radius:4px;background:var(--surface)}
+.sh h2{font-size:clamp(20px,3vw,25px);font-weight:600}
+h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px 32px}
+.two>*{min-width:0}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:6px}
+.box-note{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 14px;font-size:14px;margin-top:14px}
+.box-note b{font-weight:600}
+
+.pats{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0;padding:0;list-style:none}
+.pats li{display:flex;gap:8px;align-items:baseline;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font:500 13px var(--f-mono)}
+.pats li span{color:var(--muted)}
+.pats li.x{border-style:dashed;color:var(--muted)}
+.subs{border-collapse:collapse;font:13px var(--f-mono);width:100%}
+.subs th,.subs td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+.subs th{color:var(--muted);font-weight:500}
+.subs td:first-child{font-weight:700}
+
+.blk{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.pins{display:grid;gap:6px}
+.pin{display:flex;align-items:center;gap:6px;font:700 14px var(--f-mono)}
+.pin i,.wire i{display:block;width:26px;height:2px;background:var(--lo)}
+.wire{display:flex;align-items:center;gap:6px;font:700 14px var(--f-mono)}
+.box{border:1.5px solid var(--fg);border-radius:6px;padding:12px 16px;background:var(--surface);min-width:160px;max-width:100%}
+.box b{display:block;font:700 15px var(--f-mono)}
+.box small{display:block;color:var(--muted);font:12px var(--f-mono);margin-top:4px}
+.outs{font:12px var(--f-mono);color:var(--muted);display:grid;gap:4px}
+
+.pair{display:grid;grid-template-columns:1fr;gap:0 28px}
+@media (min-width:900px){
+  .pair{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+  .stick>.sticky-in{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tt{border-collapse:collapse;width:100%;font:13px var(--f-mono)}
+.tt th,.tt td{padding:6px 10px;text-align:center;white-space:nowrap}
+.tt th{color:var(--muted);font-weight:500;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+.tt td{background:var(--tint,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.tt tr{cursor:pointer}
+.tt td.ex{text-align:left;color:var(--muted);font-size:12px}
+.tt td.f{font-weight:700}
+.tt tr.r1 td.f{color:var(--ok)}
+.tt tr.rX td{font-style:italic;color:var(--muted);background-image:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--lo) 14%,transparent) 6px 7px)}
+.tt tr.r0 td:not(.ex):not(:first-child){color:var(--muted)}
+.tt tr.now td{background:var(--hi-soft);color:var(--fg)}
+.tt tr.now td.f{color:var(--hi)}
+.hint{font-size:13px;color:var(--muted);margin:10px 0 0}
+
+.maps{display:flex;flex-wrap:wrap;gap:18px}
+.map{margin:0;flex:1 1 250px;min-width:0}
+.map figcaption{font:600 13px var(--f-mono);color:var(--muted);margin-bottom:6px;min-height:1em}
+.kmap{display:grid;grid-template-columns:auto repeat(4,minmax(0,1fr));gap:4px}
+.kh{font:500 12px var(--f-mono);color:var(--muted);display:grid;place-items:center;padding:0 4px}
+.kh.corner{font-size:10px;white-space:nowrap}
+.kc{position:relative;min-height:50px;background:var(--cell);border:1px solid var(--line);border-radius:6px;display:grid;place-items:center}
+.kc .n{position:absolute;left:5px;top:3px;font:10px var(--f-mono);color:var(--muted)}
+.kc .v{font:700 19px var(--f-mono)}
+.kc.v0 .v{color:var(--muted);font-weight:400}
+.kc.vX .v{color:var(--muted);font-style:italic;font-weight:500}
+.kc.now::after{content:"";position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--hi);box-shadow:0 0 0 2px var(--cell)}
+.groups{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+.chip{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font:500 13px var(--f-mono);color:var(--fg);cursor:pointer}
+.chip i{display:block;width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip small{color:var(--muted);font-size:11px}
+.chip[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface))}
+.btn{font:500 13px var(--f-body);padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--fg)}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--muted);text-decoration:underline}
+.eqrow{margin-top:18px}
+.eqrow .lab{font:500 12px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.eq{font:700 clamp(19px,3.2vw,27px) var(--f-mono);margin-top:4px;overflow-wrap:anywhere}
+.eq .term{color:var(--c)}
+.eq .op{color:var(--muted);font-weight:400}
+
+.cir{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px}
+.cir svg{display:block;min-width:600px;width:100%;height:auto}
+.cir .sw{cursor:pointer}
+.cir .sw:focus-visible{outline:none}
+.cir .sw:focus-visible .hit{stroke:var(--g1);stroke-width:2}
+.live{display:grid;grid-template-columns:auto 1fr;gap:10px 22px;align-items:center;margin-top:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px}
+@media (max-width:560px){.live{grid-template-columns:1fr}}
+.live .bits{font:500 14px var(--f-mono);color:var(--muted)}
+.live .bits b{color:var(--fg);font-size:18px;letter-spacing:.1em}
+.msg{margin:6px 0 0}
+.pill{display:inline-block;font:700 13px var(--f-mono);padding:2px 9px;border-radius:999px;border:1px solid var(--line);margin-right:8px}
+.pill.f1{color:var(--ok);border-color:var(--ok)}
+.pill.f0{color:var(--muted)}
+.wchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-width:330px}
+.wchip{font:12px var(--f-mono);padding:4px 8px;border:1px solid var(--line);border-radius:6px;color:var(--muted);background:var(--cell)}
+.wchip.on{border-color:var(--hi);color:var(--fg);background:var(--hi-soft)}
+.wchip b{font-weight:700}
+.big{font:700 26px var(--f-mono);margin-top:8px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.foot{border-top:1px solid var(--line);padding-top:20px;color:var(--muted);max-width:62ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">DSD · 1er parcial · práctico del viernes</p>
+    <h1>Partes 4 y 5 del práctico</h1>
+    <p class="lede">Todo el diseño en papel, del enunciado al circuito, antes de escribir VHDL. Los switches del circuito se comportan como los de la tarjeta: muévelos y mira qué compuertas se activan.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Parte del examen">
+    <button class="tab" role="tab" id="tab-p4" aria-controls="panel-p4" aria-selected="true">Parte 4 · Placas de acero</button>
+    <button class="tab" role="tab" id="tab-p5" aria-controls="panel-p5" aria-selected="false">Parte 5 · Báscula de frascos</button>
+  </div>
+  <main>
+    <div id="panel-p4" role="tabpanel" aria-labelledby="tab-p4"></div>
+    <div id="panel-p5" role="tabpanel" aria-labelledby="tab-p5" hidden></div>
+  </main>
+  <p class="foot">Siguiente paso: pasar cada ecuación a VHDL tal cual aparece aquí, para que el código coincida con el papel.</p>
+</div>
+
+<script>
+(function(){
+  var GRAY=[0,1,3,2];
+  var bin=function(n,w){return n.toString(2).padStart(w,'0');};
+  var bit=function(n,i,V){return (n>>(V-1-i))&1;};
+  var NEG=function(v){return '<span class="neg">'+v+'</span>';};
+  var termHTML=function(t){return t.map(function(l){return l[1]?l[0]:NEG(l[0]);}).join('');};
+  var termSVG=function(t){return t.map(function(l){return '<tspan'+(l[1]?'':' text-decoration="overline"')+'>'+l[0]+'</tspan>';}).join('');};
+
+  var CFG={
+    p4:{
+      key:'p4',name:'sensores',vars:['A','B','C','D'],
+      ones:[3,6,7,9,10,11],xs:[0,1,2,4,8],
+      terms:[[['A',0],['C',1]],[['A',1],['B',0]]],
+      maps:[{title:'',base:0}],rowLabel:'AB',colLabel:'CD',init:10,
+      names:{3:'D—C',6:'B—C',7:'B—C y D—C',9:'A—D',10:'A—C (diagonal)',11:'A—D y D—C'},
+      extraCols:['Patrón'],
+      extra:function(n){return [this.names[n]||(this.xs.indexOf(n)>=0?'0 o 1 sensor':'otro patrón')];}
+    },
+    p5:{
+      key:'p5',name:'bascula',vars:['A','B','C','D','E'],
+      ones:[1,2,4,6,7,9,13,15,16,17,22,23,24,25,26,31],xs:[0,8,10,18,19,20,29],
+      terms:[[['C',0],['D',0]],[['C',0],['E',0]],[['B',0],['C',1],['E',0]],[['B',1],['C',1],['E',1]],[['C',1],['D',1],['E',1]]],
+      maps:[{title:'A = 0',base:0},{title:'A = 1',base:16}],rowLabel:'BC',colLabel:'DE',init:15,
+      mg:[160,80,40,20,10],
+      imposible:{0:'frasco vacío',8:'B',10:'BD',18:'AD',19:'ADE',20:'AC',29:'ABCE'},
+      extraCols:['Frasco','mg'],
+      extra:function(n){
+        var s='';for(var i=0;i<5;i++){if(bit(n,i,5))s+=this.vars[i];}
+        return [s||'vacío',String(n*10)];
+      }
+    }
+  };
+
+  Object.keys(CFG).forEach(function(k){
+    var c=CFG[k];
+    c.V=c.vars.length;c.size=1<<c.V;
+    c.val=function(n){return c.ones.indexOf(n)>=0?'1':(c.xs.indexOf(n)>=0?'X':'0');};
+    c.matches=function(t,n){return t.every(function(l){return bit(n,c.vars.indexOf(l[0]),c.V)===l[1];});};
+    c.fEq=function(n){return c.terms.some(function(t){return c.matches(t,n);})?1:0;};
+    c.groups=c.terms.map(function(t,i){
+      var set=new Set();
+      for(var n=0;n<c.size;n++){if(c.matches(t,n))set.add(n);}
+      return {i:i,t:t,set:set,color:'var(--g'+(i+1)+')'};
+    });
+    for(var n=0;n<c.size;n++){
+      var v=c.val(n),f=c.fEq(n);
+      if((v==='1'&&f!==1)||(v==='0'&&f!==0)){console.error('Ecuación no coincide en',k,n);}
+    }
+  });
+
+  var st={p4:{n:CFG.p4.init,sel:new Set([0])},p5:{n:CFG.p5.init,sel:new Set([0])}};
+
+  function eqHTML(c){
+    return c.groups.map(function(g){return '<span class="term" style="--c:'+g.color+'">'+termHTML(g.t)+'</span>';}).join(' <span class="op">+</span> ');
+  }
+
+  function analysisHTML(c){
+    if(c.key==='p4'){
+      return '<div class="two"><div><h3>Entradas y salida</h3><ul class="plain">'+
+        '<li><b>A, B, C, D</b> son los 4 sensores de la plantilla, uno por esquina. 1 significa que el sensor detecta un punto.</li>'+
+        '<li><b>F</b> es la salida. Si el patrón es válido manda un 1 al display de 7 segmentos; si no, manda un 0.</li>'+
+        '<li>Todo a nivel de bits: 4 entradas, 16 combinaciones, activos en alto.</li></ul></div>'+
+        '<div><h3>Casos del enunciado</h3><ul class="plain">'+
+        '<li><b>F = 1</b> en los 6 patrones válidos de abajo.</li>'+
+        '<li><b>F = X</b> con 0 o 1 sensor activo: placa defectuosa, se recicla y no importa qué salga.</li>'+
+        '<li><b>F = 0</b> en cualquier otro patrón.</li></ul></div></div>'+
+        '<h3 style="margin-top:20px">Patrones válidos, como ABCD</h3><ul class="pats">'+
+        Object.keys(c.names).map(function(n){return '<li>'+c.names[n]+' <span>'+bin(+n,4)+'</span></li>';}).join('')+
+        '<li class="x">irrelevantes <span>0000 0001 0010 0100 1000</span></li></ul>'+
+        '<p class="box-note"><b>Lectura de la figura.</b> Así leí los patrones del dibujo. Confírmalo con tu hoja: si un patrón cambia, cambia su fila en la tabla.</p>';
+    }
+    return '<div class="two"><div><h3>Entradas y salida</h3><ul class="plain">'+
+      '<li><b>A, B, C, D, E</b> valen 1 cuando esa sustancia está en la solución del frasco.</li>'+
+      '<li><b>F</b> vale 1 cuando el peso total está en la lista; entonces el dispositivo sella el frasco y lo aparta.</li>'+
+      '<li>5 entradas, 32 combinaciones, activos en alto.</li></ul>'+
+      '<div class="box-note"><b>Idea clave.</b> Dividiendo entre 10 mg los pesos son 16, 8, 4, 2 y 1. Por eso ABCDE leído en binario es el peso entre 10. Ejemplo: 01111 = 15, o sea 150 mg.</div></div>'+
+      '<div><h3>Sustancias</h3><table class="subs"><thead><tr><th>Var.</th><th>Peso</th><th>Entre 10</th></tr></thead><tbody>'+
+      c.vars.map(function(v,i){return '<tr><td>'+v+'</td><td>'+c.mg[i]+' mg</td><td>'+(c.mg[i]/10)+'</td></tr>';}).join('')+'</tbody></table></div></div>'+
+      '<h3 style="margin-top:20px">Pesos que dan F = 1 (mg)</h3><ul class="pats">'+
+      c.ones.map(function(n){return '<li>'+(n*10)+' <span>'+bin(n,5)+'</span></li>';}).join('')+'</ul>'+
+      '<h3 style="margin-top:20px">Irrelevantes: no llegan a la báscula</h3><ul class="pats">'+
+      Object.keys(c.imposible).map(function(n){return '<li class="x">'+c.imposible[n]+' <span>'+bin(+n,5)+'</span></li>';}).join('')+'</ul>'+
+      '<p class="hint">Cualquier otro peso da F = 0 y el frasco sigue por la banda.</p>';
+  }
+
+  function blockHTML(c){
+    var isP4=c.key==='p4';
+    return '<div class="blk">'+
+      '<div class="pins">'+c.vars.map(function(v){return '<div class="pin"><span>'+v+'</span><i></i></div>';}).join('')+'</div>'+
+      '<div class="box"><b>'+c.name+'</b><small>lógica combinacional</small><small>F = '+eqHTML(c)+'</small></div>'+
+      '<div class="wire"><i></i><span>F</span><i></i></div>'+
+      '<div class="box"><b>display</b><small>F = 1 muestra 1</small><small>F = 0 muestra 0</small></div>'+
+      '<div class="wire"><i></i></div>'+
+      '<div class="outs"><span>seg(6 downto 0)</span><span>an(3 downto 0) = 1110</span></div></div>'+
+      '<p class="box-note"><b>Entidad.</b> Entradas '+c.vars.join(', ')+' de tipo std_logic'+(isP4?'. D sigue siendo puerto aunque la ecuación no la use.':'. A sigue siendo puerto aunque la ecuación no la use.')+'</p>';
+  }
+
+  function tableHTML(c){
+    var h='<div class="tw"><table class="tt"><thead><tr><th>N</th>'+c.vars.map(function(v){return '<th>'+v+'</th>';}).join('')+
+      c.extraCols.map(function(e){return '<th>'+e+'</th>';}).join('')+'<th>F</th></tr></thead><tbody>';
+    for(var n=0;n<c.size;n++){
+      var v=c.val(n);
+      var ex=c.extra(n);
+      if(c.key==='p5'&&v==='X'){ex[0]='imposible: '+c.imposible[n];}
+      h+='<tr data-n="'+n+'" class="r'+v+'"><td>'+n+'</td>'+
+        c.vars.map(function(_,i){return '<td>'+bit(n,i,c.V)+'</td>';}).join('')+
+        ex.map(function(x){return '<td class="ex">'+x+'</td>';}).join('')+
+        '<td class="f">'+v+'</td></tr>';
+    }
+    return h+'</tbody></table></div><p class="hint">Toca una fila para cargar esa combinación en los switches. Las filas con X son irrelevantes.</p>';
+  }
+
+  function kmapHTML(c){
+    return '<div class="maps">'+c.maps.map(function(m){
+      var h='<figure class="map"><figcaption>'+(m.title||'&nbsp;')+'</figcaption><div class="kmap"><div class="kh corner">'+c.rowLabel+' \\ '+c.colLabel+'</div>'+
+        GRAY.map(function(g){return '<div class="kh">'+bin(g,2)+'</div>';}).join('');
+      GRAY.forEach(function(r){
+        h+='<div class="kh">'+bin(r,2)+'</div>';
+        GRAY.forEach(function(col){
+          var n=m.base+r*4+col;
+          h+='<div class="kc v'+c.val(n)+'" data-n="'+n+'"><span class="n">'+n+'</span><span class="v">'+c.val(n)+'</span></div>';
+        });
+      });
+      return h+'</div></figure>';
+    }).join('')+'</div>';
+  }
+
+  function groupsHTML(c){
+    return '<div class="groups">'+c.groups.map(function(g){
+      return '<button class="chip" data-g="'+g.i+'" style="--c:'+g.color+'" aria-pressed="false"><i></i>'+termHTML(g.t)+'<small>'+g.set.size+' casillas</small></button>';
+    }).join('')+'<button class="btn quiet" data-all="1">todos</button><button class="btn quiet" data-none="1">ninguno</button></div>';
+  }
+
+  function buildPanel(c){
+    var note=c.key==='p4'
+      ?'<b>Ojo.</b> D no aparece en la ecuación: al cambiar D el resultado no cambia en ninguna casilla que importe.'
+      :'<b>Ojo.</b> A no aparece en la ecuación: la tabla se repite igual con A = 0 y A = 1 en todas las casillas que importan. Variante: B′E′ cubre lo mismo que B′CE′ con una literal menos; las dos dan la misma función.';
+    return ''+
+    '<section class="step"><div class="sh"><span class="sn">1</span><h2>Análisis del enunciado</h2></div>'+analysisHTML(c)+'</section>'+
+    '<section class="step"><div class="sh"><span class="sn">2</span><h2>Diagrama a bloques</h2></div>'+blockHTML(c)+'</section>'+
+    '<div class="pair">'+
+      '<section class="step"><div class="sh"><span class="sn">3</span><h2>Tabla de verdad</h2></div>'+tableHTML(c)+'</section>'+
+      '<section class="step stick"><div class="sticky-in"><div class="sh"><span class="sn">4</span><h2>Mapa K y ecuación</h2></div>'+
+        kmapHTML(c)+groupsHTML(c)+
+        '<p class="hint">Toca un grupo para verlo en el mapa y en la tabla. Las X se usan como 1 cuando agrandan un grupo.</p>'+
+        '<div class="eqrow"><div class="lab">Ecuación simplificada</div><div class="eq">F = '+eqHTML(c)+'</div></div>'+
+        '<div class="box-note">'+note+'</div></div></section>'+
+    '</div>'+
+    '<section class="step"><div class="sh"><span class="sn">5</span><h2>Circuito lógico</h2></div>'+
+      '<div class="cir" data-cir="'+c.key+'"></div>'+
+      '<div class="live" data-live="'+c.key+'"></div>'+
+      '<div class="ctl"><button class="btn" data-act="prev">◀ Anterior</button><button class="btn" data-act="next">Siguiente ▶</button><button class="btn" data-act="zero">Todo en 0</button></div>'+
+    '</section>';
+  }
+
+  function seg7(x,y,digit){
+    var on=digit===1?['b','c']:['a','b','c','d','e','f'];
+    var R={a:[4,0,18,4],b:[22,4,4,17],c:[22,25,4,17],d:[4,42,18,4],e:[0,25,4,17],f:[0,4,4,17],g:[4,21,18,4]};
+    return '<g transform="translate('+x+','+y+')">'+Object.keys(R).map(function(k){
+      var r=R[k];
+      return '<rect x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" rx="1.5" fill="'+(on.indexOf(k)>=0?'var(--hi)':'var(--seg-off)')+'"/>';
+    }).join('')+'</g>';
+  }
+
+  function circuitSVG(c){
+    var V=c.V,N=st[c.key].n;
+    var val=c.vars.map(function(_,i){return bit(N,i,V);});
+    var used=c.vars.map(function(){return {t:false,c:false};});
+    c.terms.forEach(function(t){t.forEach(function(l){used[c.vars.indexOf(l[0])][l[1]?'t':'c']=true;});});
+    var SLOT=48,X0=34,YSW=22,YWIRE=60,YNOT=98,G0=134,GAP=26;
+    var xt=function(i){return X0+i*SLOT;},xc=function(i){return X0+i*SLOT+30;};
+    var GX=X0+V*SLOT+16;
+    var col=function(v){return v?'var(--hi)':'var(--lo)';};
+    var mono='font-family="JetBrains Mono, ui-monospace, Menlo, monospace"';
+    var rows=[],y=G0;
+    c.terms.forEach(function(t,k){var H=8*t.length+8;rows.push({y0:y,H:H,t:t,k:k});y+=H+GAP;});
+    var bottom=y-GAP+16;
+    var tapT=[],tapC=[];
+    c.vars.forEach(function(_,i){tapT[i]=used[i].c?YNOT:YWIRE;tapC[i]=YNOT;});
+    rows.forEach(function(r){r.t.forEach(function(l,j){
+      var i=c.vars.indexOf(l[0]),yy=r.y0+8+8*j;
+      if(l[1])tapT[i]=Math.max(tapT[i],yy);else tapC[i]=Math.max(tapC[i],yy);
+    });});
+    var wires='',parts='';
+    c.vars.forEach(function(v,i){
+      var x=xt(i),u=used[i],vv=val[i];
+      parts+='<text x="'+x+'" y="'+(YSW-8)+'" text-anchor="middle" font-size="13" font-weight="700" '+mono+' fill="var(--fg)">'+v+'</text>';
+      parts+='<g class="sw" data-var="'+i+'" role="switch" aria-checked="'+(vv?'true':'false')+'" aria-label="Switch '+v+', valor '+vv+'" tabindex="0">'+
+        '<rect class="hit" x="'+(x-16)+'" y="'+(YSW-4)+'" width="32" height="46" rx="6" fill="transparent" stroke="transparent"/>'+
+        '<rect x="'+(x-9)+'" y="'+YSW+'" width="18" height="38" rx="5" fill="var(--cell)" stroke="var(--line)" stroke-width="1.5"/>'+
+        '<rect x="'+(x-7)+'" y="'+(vv?YSW+2:YSW+20)+'" width="14" height="16" rx="3.5" fill="'+col(vv)+'"/></g>';
+      if(!u.t&&!u.c){
+        parts+='<text x="'+x+'" y="'+(YWIRE+16)+'" text-anchor="middle" font-size="9" '+mono+' fill="var(--muted)">sin uso</text>';
+        return;
+      }
+      wires+='<line x1="'+x+'" y1="'+YWIRE+'" x2="'+x+'" y2="'+tapT[i]+'" stroke="'+col(vv)+'" stroke-width="1.8"/>';
+      if(u.c){
+        wires+='<line x1="'+x+'" y1="'+YNOT+'" x2="'+(x+5)+'" y2="'+YNOT+'" stroke="'+col(vv)+'" stroke-width="1.8"/>';
+        wires+='<line x1="'+(x+22)+'" y1="'+YNOT+'" x2="'+xc(i)+'" y2="'+YNOT+'" stroke="'+col(1-vv)+'" stroke-width="1.8"/>';
+        wires+='<line x1="'+xc(i)+'" y1="'+YNOT+'" x2="'+xc(i)+'" y2="'+tapC[i]+'" stroke="'+col(1-vv)+'" stroke-width="1.8"/>';
+        parts+='<polygon points="'+(x+5)+','+(YNOT-6)+' '+(x+5)+','+(YNOT+6)+' '+(x+17)+','+YNOT+'" fill="var(--cell)" stroke="'+col(vv)+'" stroke-width="1.5"/>'+
+          '<circle cx="'+(x+19.5)+'" cy="'+YNOT+'" r="2.5" fill="var(--cell)" stroke="'+col(1-vv)+'" stroke-width="1.5"/>';
+        if(u.t)wires+='<circle cx="'+x+'" cy="'+YNOT+'" r="2.8" fill="'+col(vv)+'"/>';
+      }
+    });
+    rows.forEach(function(r){
+      r.out=c.matches(r.t,N)?1:0;
+      var color='var(--g'+(r.k+1)+')';
+      r.t.forEach(function(l,j){
+        var i=c.vars.indexOf(l[0]),bx=l[1]?xt(i):xc(i),yy=r.y0+8+8*j,lv=l[1]?val[i]:1-val[i];
+        wires+='<line x1="'+bx+'" y1="'+yy+'" x2="'+GX+'" y2="'+yy+'" stroke="'+col(lv)+'" stroke-width="1.6"/>'+
+          '<circle cx="'+bx+'" cy="'+yy+'" r="2.6" fill="'+col(lv)+'"/>';
+      });
+      parts+='<path d="M'+GX+','+r.y0+' H'+(GX+23)+' A23,'+(r.H/2)+' 0 0 1 '+(GX+23)+','+(r.y0+r.H)+' H'+GX+' Z" '+
+        'fill="'+(r.out?'color-mix(in srgb,'+color+' 26%,var(--cell))':'var(--cell)')+'" stroke="'+color+'" stroke-width="'+(r.out?2.4:1.6)+'"/>';
+      parts+='<text x="'+(GX+23)+'" y="'+(r.y0-6)+'" text-anchor="middle" font-size="11" font-weight="700" '+mono+' fill="'+color+'">'+termSVG(r.t)+'</text>';
+    });
+    var n=rows.length,OH=10*n+10;
+    var mean=rows.reduce(function(a,r){return a+r.y0+r.H/2;},0)/n;
+    var oy0=mean-OH/2,ocy=oy0+OH/2;
+    var XM0=GX+46+14,ORX=XM0+n*6+12;
+    rows.forEach(function(r,k){
+      var xo=GX+46,yo=r.y0+r.H/2,xm=XM0+k*6,yi=oy0+10+10*k,d=(yi-ocy)/(OH/2),xe=ORX+7*(1-d*d);
+      wires+='<polyline points="'+xo+','+yo+' '+xm+','+yo+' '+xm+','+yi+' '+xe+','+yi+'" fill="none" stroke="'+col(r.out)+'" stroke-width="1.6"/>';
+    });
+    var F=rows.some(function(r){return r.out;})?1:0;
+    parts+='<path d="M'+ORX+','+oy0+' Q'+(ORX+30)+','+oy0+' '+(ORX+48)+','+ocy+' Q'+(ORX+30)+','+(oy0+OH)+' '+ORX+','+(oy0+OH)+' Q'+(ORX+14)+','+ocy+' '+ORX+','+oy0+' Z" '+
+      'fill="'+(F?'var(--hi-soft)':'var(--cell)')+'" stroke="'+(F?'var(--hi)':'var(--lo)')+'" stroke-width="'+(F?2.4:1.6)+'"/>';
+    var xo2=ORX+48,xs=xo2+34;
+    wires+='<line x1="'+xo2+'" y1="'+ocy+'" x2="'+xs+'" y2="'+ocy+'" stroke="'+col(F)+'" stroke-width="2"/>';
+    parts+='<text x="'+(xo2+17)+'" y="'+(ocy-8)+'" text-anchor="middle" font-size="12" font-weight="700" '+mono+' fill="var(--fg)">F = '+F+'</text>';
+    parts+=seg7(xs,ocy-23,F);
+    parts+='<text x="'+(xs+13)+'" y="'+(ocy+38)+'" text-anchor="middle" font-size="10" '+mono+' fill="var(--muted)">display</text>';
+    var W=xs+26+20,H=Math.max(bottom,oy0+OH+24,ocy+44);
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="group" aria-label="Circuito lógico de la '+(c.key==='p4'?'parte 4':'parte 5')+'">'+wires+parts+'</svg>';
+  }
+
+  function plateSVG(b){
+    var pos=[[16,18],[84,18],[84,86],[16,86]],lab=[[16,9],[84,9],[84,104],[16,104]],names=['A','B','C','D'];
+    var s='<svg viewBox="0 0 100 112" width="108" height="120" role="img" aria-label="Placa con los cuatro sensores"><rect x="16" y="18" width="68" height="68" rx="4" fill="none" stroke="var(--line)" stroke-width="2"/>';
+    for(var i=0;i<4;i++){
+      s+='<circle cx="'+pos[i][0]+'" cy="'+pos[i][1]+'" r="7" fill="'+(b[i]?'var(--hi)':'var(--cell)')+'" stroke="'+(b[i]?'var(--hi)':'var(--lo)')+'" stroke-width="2"/>'+
+        '<text x="'+lab[i][0]+'" y="'+lab[i][1]+'" text-anchor="middle" font-size="10" font-weight="700" font-family="JetBrains Mono, ui-monospace, monospace" fill="var(--muted)">'+names[i]+'</text>';
+    }
+    return s+'</svg>';
+  }
+
+  function liveHTML(c){
+    var N=st[c.key].n,b=c.vars.map(function(_,i){return bit(N,i,c.V);}),F=c.fEq(N),v=c.val(N),left,msg;
+    var pill='<span class="pill f'+F+'">F = '+F+'</span>';
+    if(c.key==='p4'){
+      left=plateSVG(b);
+      if(v==='1')msg=pill+'Patrón válido: '+c.names[N]+'. La placa se acepta y el display muestra 1.';
+      else if(v==='X')msg=pill+'Con 0 o 1 sensor la placa es defectuosa y se recicla. Es una condición irrelevante, por eso la ecuación puede dar cualquier valor aquí.';
+      else msg=pill+'No es uno de los patrones válidos. F = 0 y el display muestra 0.';
+    }else{
+      left='<div class="wchips">'+c.vars.map(function(x,i){return '<span class="wchip'+(b[i]?' on':'')+'"><b>'+x+'</b> '+c.mg[i]+' mg</span>';}).join('')+'</div><div class="big">'+(N*10)+' mg</div>';
+      if(v==='1')msg=pill+(N*10)+' mg está en la lista. El dispositivo sella el frasco y lo aparta de la banda.';
+      else if(v==='X')msg=pill+'Esta solución ('+c.imposible[N]+') nunca llega a la báscula. Es una condición irrelevante, por eso la ecuación puede dar cualquier valor aquí.';
+      else msg=pill+(N*10)+' mg no está en la lista. El frasco sigue por la banda.';
+    }
+    return '<div>'+left+'</div><div><div class="bits">'+c.vars.join('')+' = <b>'+bin(N,c.V)+'</b> · N = '+N+'</div><p class="msg">'+msg+'</p></div>';
+  }
+
+  var panels={p4:document.getElementById('panel-p4'),p5:document.getElementById('panel-p5')};
+
+  function update(c){
+    var root=panels[c.key],s=st[c.key],N=s.n;
+    var sel=c.groups.filter(function(g){return s.sel.has(g.i);});
+    root.querySelectorAll('.kc').forEach(function(el){
+      var n=+el.dataset.n,gs=sel.filter(function(g){return g.set.has(n);});
+      el.style.boxShadow=gs.map(function(g,k){return 'inset 0 0 0 '+(3*(k+1))+'px '+g.color;}).join(',');
+      el.style.background=gs.length?'color-mix(in srgb,'+gs[0].color+' 16%,var(--cell))':'';
+      el.classList.toggle('now',n===N);
+    });
+    root.querySelectorAll('.tt tbody tr').forEach(function(tr){
+      var n=+tr.dataset.n,gs=sel.filter(function(g){return g.set.has(n);}),first=tr.firstElementChild;
+      tr.classList.toggle('now',n===N);
+      tr.style.setProperty('--tint',gs.length?'color-mix(in srgb,'+gs[0].color+' 15%,transparent)':'transparent');
+      first.style.boxShadow=gs.map(function(g,k){return 'inset '+(4*(k+1))+'px 0 0 0 '+g.color;}).join(',');
+    });
+    root.querySelectorAll('.chip').forEach(function(ch){ch.setAttribute('aria-pressed',s.sel.has(+ch.dataset.g)?'true':'false');});
+    root.querySelector('.cir').innerHTML=circuitSVG(c);
+    root.querySelector('.live').innerHTML=liveHTML(c);
+  }
+
+  Object.keys(CFG).forEach(function(k){
+    var c=CFG[k],root=panels[k];
+    root.innerHTML=buildPanel(c);
+    root.addEventListener('click',function(e){
+      var t=e.target;
+      var chip=t.closest('.chip');
+      if(chip){var g=+chip.dataset.g,sel=st[k].sel;if(sel.has(g))sel.delete(g);else sel.add(g);update(c);return;}
+      if(t.closest('[data-all]')){c.groups.forEach(function(g){st[k].sel.add(g.i);});update(c);return;}
+      if(t.closest('[data-none]')){st[k].sel.clear();update(c);return;}
+      var tr=t.closest('.tt tbody tr');
+      if(tr){st[k].n=+tr.dataset.n;update(c);return;}
+      var sw=t.closest('.sw');
+      if(sw){toggle(+sw.dataset.var);return;}
+      var act=t.closest('[data-act]');
+      if(act){
+        var a=act.dataset.act;
+        if(a==='next')st[k].n=(st[k].n+1)%c.size;
+        else if(a==='prev')st[k].n=(st[k].n+c.size-1)%c.size;
+        else st[k].n=0;
+        update(c);
+      }
+    });
+    root.addEventListener('keydown',function(e){
+      var sw=e.target.closest&&e.target.closest('.sw');
+      if(sw&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(+sw.dataset.var);}
+    });
+    function toggle(i){
+      st[k].n^=(1<<(c.V-1-i));
+      update(c);
+      var again=root.querySelector('.sw[data-var="'+i+'"]');
+      if(again)again.focus();
+    }
+    update(c);
+  });
+
+  var tabs={p4:document.getElementById('tab-p4'),p5:document.getElementById('tab-p5')};
+  Object.keys(tabs).forEach(function(k){
+    tabs[k].addEventListener('click',function(){
+      Object.keys(tabs).forEach(function(o){
+        tabs[o].setAttribute('aria-selected',o===k?'true':'false');
+        panels[o].hidden=o!==k;
+      });
+    });
+  });
+})();
+</script>

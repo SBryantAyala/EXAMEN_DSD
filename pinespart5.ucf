@@ -1,0 +1,20 @@
+# Entradas: 
+NET "A" LOC = N8;  # SW4 
+NET "B" LOC = M8;  # SW3
+NET "C" LOC = V9;  # SW2
+NET "D" LOC = T9;  # SW1
+NET "E" LOC = T10; # SW0 
+
+# Salidas: 
+NET "an(3)" LOC = P17; # AN3
+NET "an(2)" LOC = P18; # AN2
+NET "an(1)" LOC = N15; # AN1
+NET "an(0)" LOC = N16; # AN0 
+
+NET "Seg(6)" LOC = T17; # Segmento a
+NET "Seg(5)" LOC = T18; # Segmento b
+NET "Seg(4)" LOC = U17; # Segmento c
+NET "Seg(3)" LOC = U18; # Segmento d 
+NET "Seg(2)" LOC = M14; # Segmento e 
+NET "Seg(1)" LOC = N14; # Segmento f 
+NET "Seg(0)" LOC = L14; # Segmento g
